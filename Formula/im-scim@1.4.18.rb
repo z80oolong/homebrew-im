@@ -20,6 +20,7 @@ class ImScimAT1418 < Formula
   depends_on "libxau"
   depends_on "libxcb"
   depends_on "pango"
+  depends_on "gtk+3"
 
   patch :p1 do
     url "https://mirrors.sjtug.sjtu.edu.cn/gentoo/app-i18n/scim/files/scim-1.4.18-fix-for-gcc15.patch"
