@@ -50,6 +50,6 @@ class ImScimAT1418 < Formula
   end
 
   test do
-    system "#{bin}/scim-setup", "--version"
+    system "#{bin}/scim", "--version"
   end
 end

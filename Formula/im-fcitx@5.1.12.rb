@@ -62,7 +62,7 @@ class ImFcitxAT5112 < Formula
       args  = std_cmake_args
       args << "-DENABLE_GIR=ON"
       args << "-DENABLE_GTK2_IM_MODULE=OFF"
-      args << "-DENABLE_GTK3_IM_MODULE=ON"
+      args << "-DENABLE_GTK3_IM_MODULE=OFF"
       args << "-DENABLE_GTK4_IM_MODULE=OFF"
       args << "-DENABLE_SNOOPER=OFF"
 
