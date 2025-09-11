@@ -20,7 +20,6 @@ class ImScimAT1418 < Formula
   depends_on "libxau"
   depends_on "libxcb"
   depends_on "pango"
-  depends_on "gtk+3"
 
   patch :p1 do
     url "https://mirrors.sjtug.sjtu.edu.cn/gentoo/app-i18n/scim/files/scim-1.4.18-fix-for-gcc15.patch"
@@ -38,6 +37,7 @@ class ImScimAT1418 < Formula
     args << "--disable-documents"
     args << "--with-x"
     args << "--without-doxygen"
+    args << "--disable-gtk3-immodule"
     args << "--disable-gtk2-immodule"
     args << "--disable-qt3-immodule"
     args << "--disable-qt4-immodule"
