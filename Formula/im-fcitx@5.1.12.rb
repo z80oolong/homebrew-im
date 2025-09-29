@@ -11,7 +11,7 @@ class ImFcitxAT5112 < Formula
   depends_on "extra-cmake-modules" => :build
   depends_on "fmt" => :build
   depends_on "gettext" => :build
-  depends_on "pkg-config" => :build
+  depends_on "pkgconf" => :build
   depends_on "glib"
   depends_on "glibc"
   depends_on "gobject-introspection"
@@ -35,20 +35,30 @@ class ImFcitxAT5112 < Formula
   end
 
   def install
-    ENV.prepend_path "PKG_CONFIG_PATH", lib/"pkgconfig"
-
     args  = std_cmake_args.dup
+    args << "-DENABLE_ENCHANT=ON"
     args << "-DENABLE_X11=ON"
-    args << "-DENABLE_WAYLAND=OFF"
-    args << "-DENABLE_SERVER=OFF"
+    args << "-DENABLE_WAYLAND=ON"
+    args << "-DENABLE_DBUS=ON"
+    args << "-DENABLE_DOC=OFF"
+    args << "-DENABLE_SERVER=ON"
+    args << "-DENABLE_KYBOARD=ON"
     args << "-DUSE_SYSTEMD=OFF"
-    args << "-DENABLE_LIBUUID=OFF"
+    args << "-DENABLE_XDGAUTOSTART=ON"
+    args << "-DUSE_FLATPAK_ICON=OFF"
+    args << "-DENABLE_EMOJI=ON"
+    args << "-DENABLE_LIBUUID=ON"
+    args << "-DENABLE_SPELL_DICT=ON"
+    args << "-DBUILD_SHARED_LIBS=ON"
 
     system "cmake", "-S", ".", "-B", "build", *args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
 
     resource("xcb-imdkit").stage do
+      ENV["LC_ALL"] = "C"
+      ENV.prepend_path "PKG_CONFIG_PATH", lib/"pkgconfig"
+
       args  = std_cmake_args.dup
       args << "-DBUILD_SHARED_LIBS=ON"
       args << "-DUSE_SYSTEM_UTHASH=OFF"
@@ -59,7 +69,10 @@ class ImFcitxAT5112 < Formula
     end
 
     resource("fcitx5-gclient").stage do
-      args  = std_cmake_args
+      ENV["LC_ALL"] = "C"
+      ENV.prepend_path "PKG_CONFIG_PATH", lib/"pkgconfig"
+
+      args  = std_cmake_args.dup
       args << "-DENABLE_GIR=ON"
       args << "-DENABLE_GTK2_IM_MODULE=OFF"
       args << "-DENABLE_GTK3_IM_MODULE=OFF"
