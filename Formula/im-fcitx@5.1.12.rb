@@ -72,8 +72,8 @@ class ImFcitxAT5112 < Formula
       ENV["LC_ALL"] = "C"
       ENV.prepend_path "PKG_CONFIG_PATH", lib/"pkgconfig"
 
-      args  = std_cmake_args.dup
-      args << "-DENABLE_GIR=ON"
+      args  = std_cmake_args
+      args << "-DENABLE_GIR=OFF"
       args << "-DENABLE_GTK2_IM_MODULE=OFF"
       args << "-DENABLE_GTK3_IM_MODULE=OFF"
       args << "-DENABLE_GTK4_IM_MODULE=OFF"
