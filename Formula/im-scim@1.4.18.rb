@@ -10,21 +10,52 @@ class ImScimAT1418 < Formula
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "intltool" => :build
+  depends_on "libtool" => :build
   depends_on "perl" => :build
+  depends_on "gettext" => :build
   depends_on "pkgconf" => :build
-  depends_on "gettext"
+  depends_on "at-spi2-core"
+  depends_on "cairo"
+  depends_on "fontconfig"
+  depends_on "fribidi"
+  depends_on "gdk-pixbuf"
+  depends_on "harfbuzz"
   depends_on "glib"
   depends_on "glibc"
-  depends_on "libtool"
   depends_on "libx11"
   depends_on "libxau"
   depends_on "libxcb"
   depends_on "pango"
+  depends_on "libepoxy"
+  depends_on "libxdamage"
+  depends_on "libxext"
+  depends_on "libxfixes"
+  depends_on "libxi"
+  depends_on "libxinerama"
+  depends_on "libxkbcommon"
+  depends_on "libxrandr"
+  depends_on "xorgproto"
+  depends_on "gtk+3"
 
   patch :p1 do
     url "https://mirrors.sjtug.sjtu.edu.cn/gentoo/app-i18n/scim/files/scim-1.4.18-fix-for-gcc15.patch"
     sha256 "1db8d4acc686895b5d3123e172fdf6a7542ae8f160d94399982fca770e6d6bf1"
   end
+
+  def immodules_dir
+    "gtk-3.0/3.0.0/immodules"
+  end
+  private :immodules_dir
+
+  def gtkx3_immodules_dir
+    (Formula["gtk+3"].lib/immodules_dir)
+  end
+  private :gtkx3_immodules_dir
+
+  def scim_immodules_dir
+    (lib/immodules_dir)
+  end
+  private :scim_immodules_dir
 
   def install
     ENV["LC_ALL"] = "C"
@@ -44,16 +75,16 @@ class ImScimAT1418 < Formula
     args << "--enable-frontend-socket"
     args << "--enable-im-rawcode"
     args << "--enable-im-socket"
-    args << "--enable-im-agent"
     args << "--disable-orig-gtk2-immodule"
     args << "--disable-orig-gtk3-immodule"
     args << "--disable-gtk2-immodule"
-    args << "--disable-gtk3-immodule"
+    args << "--enable-gtk3-immodule"
+    args << "--with-gtk3-im-module-dir=#{scim_immodules_dir}"
     args << "--disable-qt3-immodule"
     args << "--disable-qt4-immodule"
     args << "--disable-clutter-immodule"
-    args << "--disable-panel-gtk"
-    args << "--disable-setup-ui"
+    args << "--enable-panel-gtk"
+    args << "--enable-setup-ui"
     args << "--with-x"
     args << "--without-doxygen"
     args << "--with-gtk-version=3"
@@ -61,6 +92,17 @@ class ImScimAT1418 < Formula
     system "./configure", *args
     system "make"
     system "make", "install"
+  end
+
+  def post_install
+    if (gtkx3_immodules_dir/"im-scim.so").exist?
+      ohai "Remove #{gtkx3_immodules_dir}/im-scim.so"
+      (gtkx3_immodules_dir/"im-scim.so").unlink
+    end
+
+    ohai "Symlink #{scim_immodules_dir}/im-scim.so => #{gtkx3_immodules_dir}/im-scim.so"
+    gtkx3_immodules_dir.install_symlink scim_immodules_dir/"im-scim.so"
+    system Formula["gtk+3"].bin/"gtk-query-immodules-3.0 > #{(gtkx3_immodules_dir/"..").expand_path}/immodules.cache"
   end
 
   test do

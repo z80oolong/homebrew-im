@@ -21,8 +21,10 @@ class ImFcitxAT5112 < Formula
   depends_on "libxkbcommon"
   depends_on "libxml2"
   depends_on "pcre"
+  depends_on "systemd"
   depends_on "sqlite"
   depends_on "enchant"
+  depends_on "gtk+3"
 
   resource("xcb-imdkit") do
     url "https://github.com/fcitx/xcb-imdkit/archive/refs/tags/1.0.9.tar.gz"
@@ -34,6 +36,21 @@ class ImFcitxAT5112 < Formula
     sha256 "73f63d10078c62e5b6d82e6b16fcb03d2038cc204fc00052a34ab7962b0b7815"
   end
 
+  def immodules_dir
+    "gtk-3.0/3.0.0/immodules"
+  end
+  private :immodules_dir
+
+  def gtkx3_immodules_dir
+    (Formula["gtk+3"].lib/immodules_dir)
+  end
+  private :gtkx3_immodules_dir
+
+  def fcitx_immodules_dir
+    (lib/immodules_dir)
+  end
+  private :fcitx_immodules_dir
+
   def install
     args  = std_cmake_args.dup
     args << "-DENABLE_ENCHANT=ON"
@@ -43,7 +60,7 @@ class ImFcitxAT5112 < Formula
     args << "-DENABLE_DOC=OFF"
     args << "-DENABLE_SERVER=ON"
     args << "-DENABLE_KYBOARD=ON"
-    args << "-DUSE_SYSTEMD=OFF"
+    args << "-DUSE_SYSTEMD=ON"
     args << "-DENABLE_XDGAUTOSTART=ON"
     args << "-DUSE_FLATPAK_ICON=OFF"
     args << "-DENABLE_EMOJI=ON"
@@ -75,14 +92,29 @@ class ImFcitxAT5112 < Formula
       args  = std_cmake_args
       args << "-DENABLE_GIR=OFF"
       args << "-DENABLE_GTK2_IM_MODULE=OFF"
-      args << "-DENABLE_GTK3_IM_MODULE=OFF"
+      args << "-DENABLE_GTK3_IM_MODULE=ON"
       args << "-DENABLE_GTK4_IM_MODULE=OFF"
       args << "-DENABLE_SNOOPER=OFF"
+      args << "-DGTK3_IM_MODULEDIR=#{fcitx_immodules_dir}"
+
+      # Using std::free may cause a compile error.
+      inreplace "./gtk3/utils.h", /std::free/, "free"
 
       system "cmake", "-S", ".", "-B", "build", *args
       system "cmake", "--build", "build"
       system "cmake", "--install", "build"
     end
+  end
+
+  def post_install
+    if (gtkx3_immodules_dir/"im-fcitx5.so").exist?
+      ohai "Remove #{gtkx3_immodules_dir}/im-fcitx5.so"
+      (gtkx3_immodules_dir/"im-fcitx5.so").unlink
+    end
+
+    ohai "Symlink #{fcitx_immodules_dir}/im-fcitx5.so => #{gtkx3_immodules_dir}/im-fcitx5.so"
+    gtkx3_immodules_dir.install_symlink fcitx_immodules_dir/"im-fcitx5.so"
+    system Formula["gtk+3"].bin/"gtk-query-immodules-3.0 > #{(gtkx3_immodules_dir/"..").expand_path}/immodules.cache"
   end
 
   test do
