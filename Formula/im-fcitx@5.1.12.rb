@@ -52,6 +52,21 @@ class ImFcitxAT5112 < Formula
   private :fcitx_immodules_dir
 
   def install
+    resource("xcb-imdkit").stage do
+      ENV["LC_ALL"] = "C"
+
+      args  = std_cmake_args.dup
+      args << "-DBUILD_SHARED_LIBS=ON"
+      args << "-DUSE_SYSTEM_UTHASH=OFF"
+
+      system "cmake", "-S", ".", "-B", "build", *args
+      system "cmake", "--build", "build"
+      system "cmake", "--install", "build"
+    end
+
+    ENV["LC_ALL"] = "C"
+    #ENV.prepend_path "PKG_CONFIG_PATH", lib/"pkgconfig"
+
     args  = std_cmake_args.dup
     args << "-DENABLE_ENCHANT=ON"
     args << "-DENABLE_X11=ON"
@@ -72,22 +87,9 @@ class ImFcitxAT5112 < Formula
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
 
-    resource("xcb-imdkit").stage do
-      ENV["LC_ALL"] = "C"
-      ENV.prepend_path "PKG_CONFIG_PATH", lib/"pkgconfig"
-
-      args  = std_cmake_args.dup
-      args << "-DBUILD_SHARED_LIBS=ON"
-      args << "-DUSE_SYSTEM_UTHASH=OFF"
-
-      system "cmake", "-S", ".", "-B", "build", *args
-      system "cmake", "--build", "build"
-      system "cmake", "--install", "build"
-    end
-
     resource("fcitx5-gclient").stage do
       ENV["LC_ALL"] = "C"
-      ENV.prepend_path "PKG_CONFIG_PATH", lib/"pkgconfig"
+      #ENV.prepend_path "PKG_CONFIG_PATH", lib/"pkgconfig"
 
       args  = std_cmake_args
       args << "-DENABLE_GIR=OFF"
